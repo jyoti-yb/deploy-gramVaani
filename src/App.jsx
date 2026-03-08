@@ -8,6 +8,7 @@ import Advisor from './Advisor'
 import Community from './Community'
 import CropCalendar from './CropCalendar'
 import Navbar from './Navbar'
+import WhatsAppWidget from './components/WhatsAppWidget'
 import { API_URL } from './config'
 import { getTranslation } from './translations'
 
@@ -549,6 +550,7 @@ function App() {
 
   if (showProfile) {
     return (
+      <>
       <ProfileNew 
         user={user} 
         onBack={() => setShowProfile(false)}
@@ -564,11 +566,14 @@ function App() {
           else if (page === 'calendar') { setShowProfile(false); setShowAdvisor(false); setShowCommunity(false); setShowCalendar(true); }
         }}
       />
+      <WhatsAppWidget />
+      </>
     )
   }
 
   if (showAdvisor) {
     return (
+      <>
       <Advisor 
         user={user}
         onNavigate={(page) => {
@@ -580,11 +585,14 @@ function App() {
         onLogout={handleLogout}
         onOpenVoiceAssistant={() => setShowAdvisor(false)}
       />
+      <WhatsAppWidget />
+      </>
     )
   }
 
   if (showCommunity) {
     return (
+      <>
       <Community 
         user={user}
         onBack={() => setShowCommunity(false)}
@@ -597,6 +605,8 @@ function App() {
           else if (page === 'calendar') { setShowProfile(false); setShowAdvisor(false); setShowCommunity(false); setShowCalendar(true); }
         }}
       />
+      <WhatsAppWidget />
+      </>
     )
   }
 
@@ -610,6 +620,7 @@ function App() {
           else if (page === 'profile') { setShowProfile(true); setShowCalendar(false); setShowAdvisor(false); setShowCommunity(false); }
         }} onLogout={handleLogout} language={uiLanguage} />
         <CropCalendar language={uiLanguage} key={uiLanguage} />
+        <WhatsAppWidget />
       </div>
     )
   }
@@ -839,6 +850,7 @@ function App() {
           </div>
         </div>
       )}
+      <WhatsAppWidget />
     </div>
   )
 }
