@@ -9,8 +9,20 @@ function Advisor({ user, onLogout, onNavigate, onOpenVoiceAssistant }) {
   const t = (key) => getTranslation(user?.language || 'en', key)
   const [loading, setLoading] = useState(true)
   const [weather, setWeather] = useState(null)
-  const [crops, setCrops] = useState([])
-  const [strategies, setStrategies] = useState([])
+  const [crops, setCrops] = useState([
+    { name: 'Rice', explanation: 'Suitable for current climate conditions', water_requirement: 'High', yield_potential: 'High' },
+    { name: 'Wheat', explanation: 'Good for winter season', water_requirement: 'Medium', yield_potential: 'High' },
+    { name: 'Cotton', explanation: 'Suitable for warm climate', water_requirement: 'Medium', yield_potential: 'High' },
+    { name: 'Sugarcane', explanation: 'Requires high water availability', water_requirement: 'High', yield_potential: 'Very High' },
+    { name: 'Maize', explanation: 'Versatile crop for various conditions', water_requirement: 'Medium', yield_potential: 'High' },
+    { name: 'Pulses', explanation: 'Good for soil health', water_requirement: 'Low', yield_potential: 'Medium' }
+  ])
+  const [strategies, setStrategies] = useState([
+    { icon: '💧', title: 'Water Management', benefit: 'Impact: High | Difficulty: Medium', reason: 'Cost Effectiveness: High', link: 'https://agricoop.gov.in' },
+    { icon: '🌱', title: 'Soil Health', benefit: 'Impact: High | Difficulty: Low', reason: 'Cost Effectiveness: High', link: 'https://agricoop.gov.in' },
+    { icon: '🚜', title: 'Modern Equipment', benefit: 'Impact: Medium | Difficulty: High', reason: 'Cost Effectiveness: Medium', link: 'https://agricoop.gov.in' },
+    { icon: '📊', title: 'Crop Rotation', benefit: 'Impact: High | Difficulty: Low', reason: 'Cost Effectiveness: High', link: 'https://agricoop.gov.in' }
+  ])
   const [news, setNews] = useState([])
   const [showAllCrops, setShowAllCrops] = useState(false)
   const [showAllStrategies, setShowAllStrategies] = useState(false)
@@ -81,20 +93,17 @@ function Advisor({ user, onLogout, onNavigate, onOpenVoiceAssistant }) {
           headers: { Authorization: `Bearer ${token}` }
         })
         console.log('Crops response:', cropsRes.data)
-        const cropsData = cropsRes.data.map(crop => ({
-          name: crop.crop_name,
-          explanation: crop.climate_match,
-          water_requirement: crop.water_requirement,
-          yield_potential: t('high')
-        }))
-        setCrops(cropsData)
+        if (cropsRes.data && cropsRes.data.length > 0) {
+          const cropsData = cropsRes.data.map(crop => ({
+            name: crop.crop_name,
+            explanation: crop.climate_match,
+            water_requirement: crop.water_requirement,
+            yield_potential: t('high')
+          }))
+          setCrops(cropsData)
+        }
       } catch (cropErr) {
         console.error('Crop recommendations error:', cropErr)
-        setCrops([
-          { name: 'Rice', explanation: 'Suitable for current climate', water_requirement: 'High', yield_potential: 'High' },
-          { name: 'Wheat', explanation: 'Good for winter season', water_requirement: 'Medium', yield_potential: 'High' },
-          { name: 'Cotton', explanation: 'Suitable for warm climate', water_requirement: 'Medium', yield_potential: 'High' }
-        ])
       }
       
       // Fetch strategies
@@ -102,23 +111,21 @@ function Advisor({ user, onLogout, onNavigate, onOpenVoiceAssistant }) {
         const stratRes = await apiClient.get('/api/optimization-strategies', {
           headers: { Authorization: `Bearer ${token}` }
         })
-        const stratData = stratRes.data.map((s, idx) => {
-          const icons = ['💧', '🌱', '🚜', '📊', '🌾', '⚡']
-          return {
-            icon: icons[idx % icons.length],
-            title: s.strategy_name,
-            benefit: `${t('impact')}: ${s.impact_level} | ${t('difficulty')}: ${s.difficulty}`,
-            reason: `${t('costEffectiveness')}: ${s.cost_effectiveness}`,
-            link: 'https://agricoop.gov.in'
-          }
-        })
-        setStrategies(stratData)
+        if (stratRes.data && stratRes.data.length > 0) {
+          const stratData = stratRes.data.map((s, idx) => {
+            const icons = ['💧', '🌱', '🚜', '📊', '🌾', '⚡']
+            return {
+              icon: icons[idx % icons.length],
+              title: s.strategy_name,
+              benefit: `${t('impact')}: ${s.impact_level} | ${t('difficulty')}: ${s.difficulty}`,
+              reason: `${t('costEffectiveness')}: ${s.cost_effectiveness}`,
+              link: 'https://agricoop.gov.in'
+            }
+          })
+          setStrategies(stratData)
+        }
       } catch (stratErr) {
         console.error('Strategies error:', stratErr)
-        setStrategies([
-          { icon: '💧', title: 'Water Management', benefit: 'Impact: High | Difficulty: Medium', reason: 'Cost Effectiveness: High', link: 'https://agricoop.gov.in' },
-          { icon: '🌱', title: 'Soil Health', benefit: 'Impact: High | Difficulty: Low', reason: 'Cost Effectiveness: High', link: 'https://agricoop.gov.in' }
-        ])
       }
       
     } catch (err) {
