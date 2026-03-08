@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Edit2, Save, X, User, Mail, MapPin, Globe, Calendar, MessageSquare, TrendingUp, Activity } from 'lucide-react'
-import axios from 'axios'
+import apiClient from './apiClient'
 import { getTranslation } from './translations'
 import Navbar from './Navbar'
 import './ProfileMobile.css'
@@ -25,7 +25,7 @@ function Profile({ user, onBack, onUserUpdate, onLogout, onNavigate }) {
   const fetchUserQueries = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await axios.get('http://localhost:8000/api/query-history', {
+      const response = await apiClient.get('/api/query-history', {
         headers: { Authorization: `Bearer ${token}` }
       })
       const queriesData = response.data.queries || []
@@ -52,7 +52,7 @@ function Profile({ user, onBack, onUserUpdate, onLogout, onNavigate }) {
     setError('')
     try {
       const token = localStorage.getItem('token')
-      await axios.put('http://localhost:8000/api/profile', editData, {
+      await apiClient.put('/api/profile', editData, {
         headers: { Authorization: `Bearer ${token}` }
       })
       onUserUpdate(editData)
