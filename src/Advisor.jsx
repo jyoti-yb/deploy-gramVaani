@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { MapPin, Droplets, Wind, CloudRain, AlertTriangle, Sprout, TrendingUp, ExternalLink, ChevronDown, User, Users, LogOut } from 'lucide-react'
-import axios from 'axios'
+import apiClient from './apiClient'
 import Navbar from './Navbar'
 import { getTranslation } from './translations'
 import './Advisor.css'
@@ -49,7 +49,7 @@ function Advisor({ user, onLogout, onNavigate, onOpenVoiceAssistant }) {
       const token = localStorage.getItem('token')
       
       // Fetch weather
-      const weatherRes = await axios.get('http://localhost:8000/api/weather', {
+      const weatherRes = await apiClient.get('/api/weather', {
         headers: { Authorization: `Bearer ${token}` }
       })
       setWeather({
@@ -62,7 +62,7 @@ function Advisor({ user, onLogout, onNavigate, onOpenVoiceAssistant }) {
       })
       
       // Fetch crops
-      const cropsRes = await axios.get('http://localhost:8000/api/crop-recommendations', {
+      const cropsRes = await apiClient.get('/api/crop-recommendations', {
         headers: { Authorization: `Bearer ${token}` }
       })
       const cropsData = cropsRes.data.map(crop => ({
@@ -74,7 +74,7 @@ function Advisor({ user, onLogout, onNavigate, onOpenVoiceAssistant }) {
       setCrops(cropsData)
       
       // Fetch strategies
-      const stratRes = await axios.get('http://localhost:8000/api/optimization-strategies', {
+      const stratRes = await apiClient.get('/api/optimization-strategies', {
         headers: { Authorization: `Bearer ${token}` }
       })
       const stratData = stratRes.data.map((s, idx) => {
@@ -112,7 +112,7 @@ function Advisor({ user, onLogout, onNavigate, onOpenVoiceAssistant }) {
     setLoadingNews(true)
     try {
       const token = localStorage.getItem('token')
-      const response = await axios.get('http://localhost:8000/api/agriculture-news', {
+      const response = await apiClient.get('/api/agriculture-news', {
         headers: { Authorization: `Bearer ${token}` }
       })
       const newsData = response.data.map(n => ({
