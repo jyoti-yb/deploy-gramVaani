@@ -49,23 +49,38 @@ function Advisor({ user, onLogout, onNavigate, onOpenVoiceAssistant }) {
       const token = localStorage.getItem('token')
       
       // Fetch weather
-      const weatherRes = await apiClient.get('/api/weather', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      setWeather({
-        location: user?.location?.split(',')[0] || t('yourLocation'),
-        temperature: weatherRes.data.temperature,
-        humidity: weatherRes.data.humidity,
-        rainfall: weatherRes.data.rainfall || t('none'),
-        description: weatherRes.data.condition,
-        hasRain: weatherRes.data.rainfall > 0
-      })
+      try {
+        const weatherRes = await apiClient.post('/api/weather', {
+          city: 'current'
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setWeather({
+          location: user?.location?.split(',')[0] || t('yourLocation'),
+          temperature: weatherRes.data.temperature || 28,
+          humidity: weatherRes.data.humidity || 65,
+          rainfall: weatherRes.data.rainfall || t('none'),
+          description: weatherRes.data.condition || 'Clear',
+          hasRain: weatherRes.data.rainfall > 0
+        })
+      } catch (weatherErr) {
+        console.error('Weather error:', weatherErr)
+        setWeather({
+          location: user?.location?.split(',')[0] || 'Your Area',
+          temperature: 28,
+          humidity: 65,
+          rainfall: 'None',
+          description: 'partly cloudy',
+          hasRain: false
+        })
+      }
       
       // Fetch crops
       try {
         const cropsRes = await apiClient.get('/api/crop-recommendations', {
           headers: { Authorization: `Bearer ${token}` }
         })
+        console.log('Crops response:', cropsRes.data)
         const cropsData = cropsRes.data.map(crop => ({
           name: crop.crop_name,
           explanation: crop.climate_match,
@@ -76,38 +91,38 @@ function Advisor({ user, onLogout, onNavigate, onOpenVoiceAssistant }) {
       } catch (cropErr) {
         console.error('Crop recommendations error:', cropErr)
         setCrops([
-          { name: 'Rice', explanation: 'Suitable for current climate', water_requirement: 'High', yield_potential: t('high') },
-          { name: 'Wheat', explanation: 'Good for winter season', water_requirement: 'Medium', yield_potential: t('high') },
-          { name: 'Cotton', explanation: 'Suitable for warm climate', water_requirement: 'Medium', yield_potential: t('high') }
+          { name: 'Rice', explanation: 'Suitable for current climate', water_requirement: 'High', yield_potential: 'High' },
+          { name: 'Wheat', explanation: 'Good for winter season', water_requirement: 'Medium', yield_potential: 'High' },
+          { name: 'Cotton', explanation: 'Suitable for warm climate', water_requirement: 'Medium', yield_potential: 'High' }
         ])
       }
       
       // Fetch strategies
-      const stratRes = await apiClient.get('/api/optimization-strategies', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      const stratData = stratRes.data.map((s, idx) => {
-        const icons = ['💧', '🌱', '🚜', '📊', '🌾', '⚡']
-        return {
-          icon: icons[idx % icons.length],
-          title: s.strategy_name,
-          benefit: `${t('impact')}: ${s.impact_level} | ${t('difficulty')}: ${s.difficulty}`,
-          reason: `${t('costEffectiveness')}: ${s.cost_effectiveness}`,
-          link: 'https://agricoop.gov.in'
-        }
-      })
-      setStrategies(stratData)
+      try {
+        const stratRes = await apiClient.get('/api/optimization-strategies', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const stratData = stratRes.data.map((s, idx) => {
+          const icons = ['💧', '🌱', '🚜', '📊', '🌾', '⚡']
+          return {
+            icon: icons[idx % icons.length],
+            title: s.strategy_name,
+            benefit: `${t('impact')}: ${s.impact_level} | ${t('difficulty')}: ${s.difficulty}`,
+            reason: `${t('costEffectiveness')}: ${s.cost_effectiveness}`,
+            link: 'https://agricoop.gov.in'
+          }
+        })
+        setStrategies(stratData)
+      } catch (stratErr) {
+        console.error('Strategies error:', stratErr)
+        setStrategies([
+          { icon: '💧', title: 'Water Management', benefit: 'Impact: High | Difficulty: Medium', reason: 'Cost Effectiveness: High', link: 'https://agricoop.gov.in' },
+          { icon: '🌱', title: 'Soil Health', benefit: 'Impact: High | Difficulty: Low', reason: 'Cost Effectiveness: High', link: 'https://agricoop.gov.in' }
+        ])
+      }
       
     } catch (err) {
       console.error('Advisor data error:', err)
-      setWeather({
-        location: user?.location?.split(',')[0] || 'Your Area',
-        temperature: 28,
-        humidity: 65,
-        rainfall: 'None',
-        description: 'partly cloudy',
-        hasRain: false
-      })
     } finally {
       setLoading(false)
     }
